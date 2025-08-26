@@ -1,5 +1,11 @@
-use boring::ssl::{CertificateCompressionAlgorithm, CertificateCompressor};
-use std::io::{self, Read, Result, Write};
+use boring::{
+    error::ErrorStack,
+    ssl::{
+        CertificateCompressionAlgorithm, CertificateCompressor, SslConnectorBuilder, SslVerifyMode,
+    },
+    x509::{X509, store::X509StoreBuilder},
+};
+use std::io::{self, Read, Write};
 
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
@@ -10,7 +16,7 @@ impl CertificateCompressor for BrotliCertificateCompressor {
     const CAN_COMPRESS: bool = true;
     const CAN_DECOMPRESS: bool = true;
 
-    fn compress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn compress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -20,7 +26,7 @@ impl CertificateCompressor for BrotliCertificateCompressor {
         Ok(())
     }
 
-    fn decompress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn decompress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -55,7 +61,7 @@ impl CertificateCompressor for ZlibCertificateCompressor {
     const CAN_COMPRESS: bool = true;
     const CAN_DECOMPRESS: bool = true;
 
-    fn compress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn compress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -65,7 +71,7 @@ impl CertificateCompressor for ZlibCertificateCompressor {
         Ok(())
     }
 
-    fn decompress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn decompress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -84,7 +90,7 @@ impl CertificateCompressor for ZstdCertificateCompressor {
     const CAN_COMPRESS: bool = true;
     const CAN_DECOMPRESS: bool = true;
 
-    fn compress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn compress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -94,7 +100,7 @@ impl CertificateCompressor for ZstdCertificateCompressor {
         Ok(())
     }
 
-    fn decompress<W>(&self, input: &[u8], output: &mut W) -> Result<()>
+    fn decompress<W>(&self, input: &[u8], output: &mut W) -> std::io::Result<()>
     where
         W: Write,
     {
@@ -117,5 +123,80 @@ impl CertificateCompressor for ZstdCertificateCompressor {
             }
         }
         Ok(())
+    }
+}
+
+/// SslConnectorBuilderExt trait for `SslConnectorBuilder`.
+pub trait SslConnectorBuilderExt {
+    /// Configure the CertStore for the given `SslConnectorBuilder`.
+    fn set_cert_store_from_iter<I: IntoIterator<Item = T>, T: AsRef<[u8]>>(
+        self,
+        store: I,
+    ) -> Result<SslConnectorBuilder, ErrorStack>;
+
+    /// Configure the certificate verification for the given `SslConnectorBuilder`.
+    fn set_cert_verification(self, enable: bool) -> Result<SslConnectorBuilder, ErrorStack>;
+
+    /// Configure the certificate compression algorithm for the given `SslConnectorBuilder`.
+    fn add_certificate_compression_algorithms(
+        self,
+        algs: Option<&[CertificateCompressionAlgorithm]>,
+    ) -> Result<SslConnectorBuilder, ErrorStack>;
+}
+
+impl SslConnectorBuilderExt for SslConnectorBuilder {
+    #[inline]
+    fn set_cert_store_from_iter<I: IntoIterator<Item = T>, T: AsRef<[u8]>>(
+        mut self,
+        store: I,
+    ) -> Result<SslConnectorBuilder, ErrorStack> {
+        let mut cert_store = X509StoreBuilder::new()?;
+        store
+            .into_iter()
+            .flat_map(|c| X509::from_der(AsRef::<[u8]>::as_ref(&c)))
+            .for_each(|x509| cert_store.add_cert(x509).unwrap());
+        self.set_cert_store_builder(cert_store);
+        Ok(self)
+    }
+
+    #[inline]
+    fn set_cert_verification(mut self, enable: bool) -> Result<SslConnectorBuilder, ErrorStack> {
+        if enable {
+            self.set_verify(SslVerifyMode::PEER);
+        } else {
+            self.set_verify(SslVerifyMode::NONE);
+        }
+
+        Ok(self)
+    }
+
+    #[inline]
+    fn add_certificate_compression_algorithms(
+        mut self,
+        algs: Option<&[CertificateCompressionAlgorithm]>,
+    ) -> Result<SslConnectorBuilder, ErrorStack> {
+        if let Some(algs) = algs {
+            for algorithm in algs.iter() {
+                if algorithm == &CertificateCompressionAlgorithm::ZLIB {
+                    self.add_certificate_compression_algorithm(
+                        ZlibCertificateCompressor::default(),
+                    )?;
+                }
+
+                if algorithm == &CertificateCompressionAlgorithm::BROTLI {
+                    self.add_certificate_compression_algorithm(
+                        BrotliCertificateCompressor::default(),
+                    )?;
+                }
+
+                if algorithm == &CertificateCompressionAlgorithm::ZSTD {
+                    self.add_certificate_compression_algorithm(
+                        ZstdCertificateCompressor::default(),
+                    )?;
+                }
+            }
+        }
+
+        Ok(self)
     }
 }
