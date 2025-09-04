@@ -200,3 +200,53 @@ impl SslConnectorBuilderExt for SslConnectorBuilder {
         Ok(self)
     }
 }
+
+
+// From https://github.com/0x676e67/wreq/blob/86ee4e3343466f0284837d4bec6429f28620fc1a/src/tls/mod.rs#L59
+
+/// A TLS ALPN protocol.
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub struct AlpnProtocol(&'static [u8]);
+
+impl AlpnProtocol {
+    /// Prefer HTTP/1.1
+    pub const HTTP1: AlpnProtocol = AlpnProtocol(b"http/1.1");
+
+    /// Prefer HTTP/2
+    pub const HTTP2: AlpnProtocol = AlpnProtocol(b"h2");
+
+    /// Create a new [`AlpnProtocol`] from a static byte slice.
+    #[inline]
+    pub const fn new(value: &'static [u8]) -> Self {
+        AlpnProtocol(value)
+    }
+
+    #[inline]
+    fn encode(self) -> Bytes {
+        Self::encode_sequence(std::iter::once(&self))
+    }
+
+    fn encode_sequence<'a, I>(items: I) -> Bytes
+    where
+        I: IntoIterator<Item = &'a AlpnProtocol>,
+    {
+        let mut buf = BytesMut::new();
+        for item in items {
+            buf.put_u8(item.0.len() as u8);
+            buf.extend_from_slice(item.0);
+        }
+        buf.freeze()
+    }
+}
+
+/// Application-layer protocol settings for HTTP/1.1 and HTTP/2.
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub struct AlpsProtocol(&'static [u8]);
+
+impl AlpsProtocol {
+    /// Prefer HTTP/1.1
+    pub const HTTP1: AlpsProtocol = AlpsProtocol(b"http/1.1");
+
+    /// Prefer HTTP/2
+    pub const HTTP2: AlpsProtocol = AlpsProtocol(b"h2");
+}
