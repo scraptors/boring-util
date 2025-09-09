@@ -65,7 +65,7 @@ checksum = "34efbcccd345379ca2868b2b2c9d3782e9cc58ba87bc7d79d5b53d9c9ae6f25d"
 [[package]]
 name = "boring"
 version = "4.17.0"
-source = "git+https://github.com/scraptors/boring?rev=62b03ada7fcb2d4201ccdabca2028bb2fbe09943#62b03ada7fcb2d4201ccdabca2028bb2fbe09943"
+source = "git+https://github.com/scraptors/boring?rev=716eec6b4311c9f1225a2bf506774348a75fa5f4#716eec6b4311c9f1225a2bf506774348a75fa5f4"
 dependencies = [
  "bitflags",
  "boring-sys",
@@ -77,7 +77,7 @@ dependencies = [
 [[package]]
 name = "boring-sys"
 version = "4.17.0"
-source = "git+https://github.com/scraptors/boring?rev=62b03ada7fcb2d4201ccdabca2028bb2fbe09943#62b03ada7fcb2d4201ccdabca2028bb2fbe09943"
+source = "git+https://github.com/scraptors/boring?rev=716eec6b4311c9f1225a2bf506774348a75fa5f4#716eec6b4311c9f1225a2bf506774348a75fa5f4"
 dependencies = [
  "autocfg",
  "bindgen",
@@ -92,6 +92,7 @@ version = "0.1.0"
 dependencies = [
  "boring",
  "brotli",
+ "bytes",
  "flate2",
  "zstd",
 ]
@@ -116,6 +117,12 @@ dependencies = [
  "alloc-no-stdlib",
  "alloc-stdlib",
 ]
+
+[[package]]
+name = "bytes"
+version = "1.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d71b6127be86fdcfddb610f7182ac57211d4b18a3e9c82eb2d17662f2227ad6a"
 
 [[package]]
 name = "cc"

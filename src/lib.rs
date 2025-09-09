@@ -5,6 +5,7 @@ use boring::{
     },
     x509::{X509, store::X509StoreBuilder},
 };
+use bytes::{BufMut, Bytes, BytesMut};
 use std::io::{self, Read, Write};
 
 #[derive(Debug, Clone, Default)]
@@ -201,7 +202,6 @@ impl SslConnectorBuilderExt for SslConnectorBuilder {
     }
 }
 
-
 // From https://github.com/0x676e67/wreq/blob/86ee4e3343466f0284837d4bec6429f28620fc1a/src/tls/mod.rs#L59
 
 /// A TLS ALPN protocol.
@@ -222,11 +222,11 @@ impl AlpnProtocol {
     }
 
     #[inline]
-    fn encode(self) -> Bytes {
+    pub fn encode(self) -> Bytes {
         Self::encode_sequence(std::iter::once(&self))
     }
 
-    fn encode_sequence<'a, I>(items: I) -> Bytes
+    pub fn encode_sequence<'a, I>(items: I) -> Bytes
     where
         I: IntoIterator<Item = &'a AlpnProtocol>,
     {
