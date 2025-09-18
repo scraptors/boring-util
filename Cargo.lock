@@ -64,8 +64,8 @@ checksum = "34efbcccd345379ca2868b2b2c9d3782e9cc58ba87bc7d79d5b53d9c9ae6f25d"
 
 [[package]]
 name = "boring"
-version = "4.17.0"
-source = "git+https://github.com/scraptors/boring?rev=716eec6b4311c9f1225a2bf506774348a75fa5f4#716eec6b4311c9f1225a2bf506774348a75fa5f4"
+version = "4.19.0"
+source = "git+https://github.com/scraptors/boring?rev=0888fec7496bf623248b66c72dd801a4c3f41952#0888fec7496bf623248b66c72dd801a4c3f41952"
 dependencies = [
  "bitflags",
  "boring-sys",
@@ -76,8 +76,8 @@ dependencies = [
 
 [[package]]
 name = "boring-sys"
-version = "4.17.0"
-source = "git+https://github.com/scraptors/boring?rev=716eec6b4311c9f1225a2bf506774348a75fa5f4#716eec6b4311c9f1225a2bf506774348a75fa5f4"
+version = "4.19.0"
+source = "git+https://github.com/scraptors/boring?rev=0888fec7496bf623248b66c72dd801a4c3f41952#0888fec7496bf623248b66c72dd801a4c3f41952"
 dependencies = [
  "autocfg",
  "bindgen",

@@ -139,9 +139,9 @@ pub trait SslConnectorBuilderExt {
 
     /// Configure the certificate compression algorithm for the given `SslConnectorBuilder`.
     fn add_certificate_compression_algorithms(
-        self,
-        algs: Option<&[CertificateCompressionAlgorithm]>,
-    ) -> Result<SslConnectorBuilder, ErrorStack>;
+        &mut self,
+        algs: &[CertificateCompressionAlgorithm],
+    ) -> Result<(), ErrorStack>;
 }
 
 impl SslConnectorBuilderExt for SslConnectorBuilder {
@@ -172,31 +172,23 @@ impl SslConnectorBuilderExt for SslConnectorBuilder {
 
     #[inline]
     fn add_certificate_compression_algorithms(
-        mut self,
-        algs: Option<&[CertificateCompressionAlgorithm]>,
-    ) -> Result<SslConnectorBuilder, ErrorStack> {
-        if let Some(algs) = algs {
-            for algorithm in algs.iter() {
-                if algorithm == &CertificateCompressionAlgorithm::ZLIB {
-                    self.add_certificate_compression_algorithm(
-                        ZlibCertificateCompressor::default(),
-                    )?;
-                }
+        &mut self,
+        algs: &[CertificateCompressionAlgorithm],
+    ) -> Result<(), ErrorStack> {
+        for algorithm in algs.iter() {
+            if algorithm == &CertificateCompressionAlgorithm::ZLIB {
+                self.add_certificate_compression_algorithm(ZlibCertificateCompressor::default())?;
+            }
 
-                if algorithm == &CertificateCompressionAlgorithm::BROTLI {
-                    self.add_certificate_compression_algorithm(
-                        BrotliCertificateCompressor::default(),
-                    )?;
-                }
+            if algorithm == &CertificateCompressionAlgorithm::BROTLI {
+                self.add_certificate_compression_algorithm(BrotliCertificateCompressor::default())?;
+            }
 
-                if algorithm == &CertificateCompressionAlgorithm::ZSTD {
-                    self.add_certificate_compression_algorithm(
-                        ZstdCertificateCompressor::default(),
-                    )?;
-                }
+            if algorithm == &CertificateCompressionAlgorithm::ZSTD {
+                self.add_certificate_compression_algorithm(ZstdCertificateCompressor::default())?;
             }
         }
 
-        Ok(self)
+        Ok(())
     }
 }
