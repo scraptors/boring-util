@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-boring = { git = "https://github.com/scraptors/boring", rev = "f97f202e6d700a020fcd4a50f90c6a492d8f0d2a", features = ["pq-experimental"] }
+boring = { git = "https://github.com/scraptors/boring", rev = "8c49f91c383a5c1cb077049ea7a01406af891961", features = ["pq-experimental"] }
 brotli = "8.0.2"
 flate2 = "1.1.2"
 zstd = "0.13.3"
